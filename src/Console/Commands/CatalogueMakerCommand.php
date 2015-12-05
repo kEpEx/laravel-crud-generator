@@ -1,6 +1,6 @@
 <?php
 
-namespace CatalogueMaker;
+namespace CatalogueMaker\Console\Commands;
 
 //namespace App\Console\Commands;
 
@@ -103,7 +103,7 @@ class CatalogueMakerCommand extends Command
     }
 
     protected function generateCatalogue($template_name, $destination_path, $options) {
-        $c = $this->renderWithData(base_path().'/resources/assets/cataloguemaker/'.$template_name.'.tpl.php', $options);
+        $c = $this->renderWithData(__DIR__.'/../../Templates/'.$template_name.'.tpl.php', $options);
         file_put_contents($destination_path, $c);
         $this->info('Created Controller: '.$destination_path);
 
