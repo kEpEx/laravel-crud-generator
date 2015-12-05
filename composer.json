@@ -5,7 +5,7 @@
     "authors": [
         {
             "name": "Alfredo Aguirre",
-            "email": "alfrednx@gmail.com",
+            "email": "alfrednx@gmail.com"
         }
      ],
     "require": {
@@ -16,5 +16,5 @@
         "psr-4": {
             "CatalogueMaker\\": "src/"
         }
-    },
+    }
 }
