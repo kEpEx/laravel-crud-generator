@@ -1,0 +1,7 @@
+{
+    "name": "kepex/laravel-catalogue-maker",
+    "require": {
+        "php": ">=5.5.9",
+        "laravel/framework": "5.1.*"
+    }
+}
