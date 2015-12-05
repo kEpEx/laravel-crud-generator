@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Console\Commands;
+namespace CatalogueMaker;
+
+//namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use DB;
 use Artisan;
 
-class CatalogueMaker extends Command
+class CatalogueMakerCommand extends Command
 {
     /**
      * The name and signature of the console command.

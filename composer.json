@@ -1,7 +1,20 @@
 {
     "name": "kepex/laravel-catalogue-maker",
+    "description": "Generate model, controller with templates that provides basic functionality for listing, adding and modifying entities",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alfredo Aguirre",
+            "email": "alfrednx@gmail.com",
+        }
+     ],
     "require": {
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*"
-    }
+    },
+    "autoload": {
+        "psr-4": {
+            "CatalogueMaker\\": "src/"
+        }
+    },
 }
