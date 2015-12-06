@@ -3,7 +3,7 @@ Generate model, controller with templates that provides basic functionality for 
 
 Installing
 
-php composer.phar require kepex/laravel-catalogue-maker dev-master
+	php composer.phar require kepex/laravel-catalogue-maker dev-master
 
 
 Add to config/app.php the following line to the 'providers' array:

@@ -15,6 +15,7 @@ class CatalogueMakerServiceProvider extends ServiceProvider
     public function boot()
     {
         \Route::get('/testcatalogemaker', function () { echo 'CatalogueMakerServiceProvider: OK'; });
+        $this->loadViewsFrom(__DIR__.'/views', 'cataloguemaker');
     }
 
 

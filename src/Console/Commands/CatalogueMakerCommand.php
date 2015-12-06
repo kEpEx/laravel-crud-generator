@@ -44,6 +44,7 @@ class CatalogueMakerCommand extends Command
         $tablename = $this->argument('name');
         $modelname = ucfirst($tablename);
         $prefix = \Config::get('database.connections.mysql.prefix');
+        $tablename_plural = str_plural($tablename);
 
         $this->info('Creating catalogue for table: '.$tablename);
         $this->info('Model Name: '.$modelname);
@@ -52,10 +53,14 @@ class CatalogueMakerCommand extends Command
         if($this->option('recreate')) {
             foreach([
                     $modelpath,
-                    app_path().'/Http/Controllers/'.$modelname.'Controller.php'
+                    app_path().'/Http/Controllers/'.$modelname.'Controller.php',
+                    base_path().'/resources/views/'.$tablename_plural.'/index.blade.php',
+                    base_path().'/resources/views/'.$tablename_plural.'/add.blade.php',
                 ] as $path) {
-                if(file_exists($path)) unlink($path);    
-                $this->info('Deleted: '.$path);
+                if(file_exists($path)) { 
+                    unlink($path);    
+                    $this->info('Deleted: '.$path);
+                }   
             }
         }
 
@@ -77,16 +82,31 @@ class CatalogueMakerCommand extends Command
         $modelfull = '\App\\'.$modelname;
         $this->info('Example data: '.$modelfull::first());
 
-        //$c = Iluminate\View\Compilers\BladeCompiler::compileString()
+        
+
+        if(!is_dir(base_path().'/resources/views/'.$tablename_plural)) { 
+            $this->info('Creating directory: '.base_path().'/resources/views/'.$tablename_plural);
+            mkdir( base_path().'/resources/views/'.$tablename_plural ); 
+        }
         
         $options = [
                 'model_uc' => $modelname,
                 'model_singular' => $tablename,
-                'model_plural' => str_plural($tablename)
+                'model_plural' => $tablename_plural
             ];
         $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.$modelname.'Controller.php', $options);
-        $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.$modelname.'Controller.php', $options);
+        $this->generateCatalogue('view.index', base_path().'/resources/views/'.$tablename_plural.'/index.blade.php', $options);
+        $this->generateCatalogue('view.add', base_path().'/resources/views/'.$tablename_plural.'/add.blade.php', $options);
         
+
+        $addroute = 'Route::controller(\'/'.$tablename_plural.'\', \''.$modelname.'Controller\');';
+        $routing = file_get_contents(app_path().'/Http/routes.php');
+        if(!str_contains($routing, $addroute)) {
+            $newcontent = $routing."\n".$addroute;
+            file_put_contents(app_path().'/Http/routes.php', $newcontent);    
+        }
+        
+
         //$headers = ['Name', 'Email'];
         //$users = App\User::all(['name', 'email'])->toArray();
 

@@ -16,7 +16,7 @@ class {{model_uc}}Controller extends Controller
     //
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
 
@@ -25,8 +25,16 @@ class {{model_uc}}Controller extends Controller
 		//${{model_plural}} = DB::select("select *,u.name as user_name from {{model_plural}} t join users u on t.user_id=u.id");
 		${{model_plural}} = {{model_uc}}::orderBy('id', 'desc')->get();
 
-	    return view('{{model_plural}}', [
+	    return view('{{model_plural}}.index', [
 	        '{{model_plural}}' => ${{model_plural}}
+	    ]);
+	}
+
+	public function getAdd(Request $request)
+	{
+		
+	    return view('{{model_plural}}.add', [
+	        
 	    ]);
 	}
 
@@ -42,7 +50,7 @@ class {{model_uc}}Controller extends Controller
 	    //${{model_singular}}->user_id = $request->user()->id;
 	    ${{model_singular}}->save();
 
-	    return redirect('/{{model_plural}}');
+	    return redirect('/{{model_plural}}.index');
 
 	}
 
@@ -52,12 +60,12 @@ class {{model_uc}}Controller extends Controller
 
 		if($request->user()->id == ${{model_singular}}->user_id) {
 			 ${{model_singular}}->delete();
-			 return redirect('/{{model_plural}}');
+			 return redirect('/{{model_plural}}.index');
 		}
 		else {
 			//print_r(${{model_singular}});
 			//return view('{{model_plural}}');
-			return redirect('/{{model_plural}}?error');	
+			return redirect('/{{model_plural}}.index?error');	
 		}
 	    
 	}
