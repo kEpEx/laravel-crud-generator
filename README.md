@@ -1,4 +1,7 @@
-# laravel-catalogue-maker
+# laravel-crud-generator
+
+###*Still on development*
+
 php artisan command to generate fully working crud with grid paginated server side only by having database tables
 
 

@@ -46,7 +46,7 @@ class {{model_uc}}Controller extends Controller
 		$select = "SELECT * ";
 		$presql = " FROM {{prefix}}{{tablename}} a ";
 		if($_GET['search']['value']) {	
-			$sql .= " WHERE a.name LIKE '%".$_GET['search']['value']."%' ";
+			$presql .= " WHERE a.name LIKE '%".$_GET['search']['value']."%' ";
 		}
 		
 		$presql .= "  ";
