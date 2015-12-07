@@ -1,4 +1,4 @@
-@extends('CrudGenerator::layouts.master')
+@extends('crudgenerator::layouts.master')
 
 @section('content')
 
