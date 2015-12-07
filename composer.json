@@ -1,6 +1,6 @@
 {
-    "name": "kepex/laravel-catalogue-maker",
-    "description": "Generate model, controller with templates that provides basic functionality for listing, adding and modifying entities",
+    "name": "kepex/laravel-crud-generator",
+    "description": "php artisan command to generate fully working crud with grid paginated server side only by having database tables",
     "license": "MIT",
     "authors": [
         {
