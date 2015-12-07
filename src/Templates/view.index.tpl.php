@@ -1,4 +1,4 @@
-@extends('cataloguemaker::layouts.master')
+@extends('CrudGenerator::layouts.master')
 
 @section('content')
 

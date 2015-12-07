@@ -1,16 +1,17 @@
 # laravel-catalogue-maker
-Generate model, controller with templates that provides basic functionality for listing, adding and modifying entities
+php artisan command to generate fully working crud with grid paginated server side only by having database tables — Edit
+
 
 Installing
 
-php composer.phar require kepex/laravel-catalogue-maker dev-master
+php composer.phar require kepex/laravel-crud-generator dev-master
 
 
 Add to config/app.php the following line to the 'providers' array:
 
-    CatalogueMaker\CatalogueMakerServiceProvider::class,
+    CrudGenerator\CrudGeneratorServiceProvider::class,
 
 
 Usage
 
-	php artisan make:catalogue database_table_name
+	php artisan make:crud database_table_name

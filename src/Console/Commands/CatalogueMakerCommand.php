@@ -1,6 +1,6 @@
 <?php
 
-namespace CatalogueMaker\Console\Commands;
+namespace CrudGenerator\Console\Commands;
 
 //namespace App\Console\Commands;
 
@@ -8,14 +8,14 @@ use Illuminate\Console\Command;
 use DB;
 use Artisan;
 
-class CatalogueMakerCommand extends Command
+class CrudGeneratorCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:catalogue {name} {--singular} {--recreate} {custom_table_name?}';
+    protected $signature = 'make:crud {name} {--singular} {--recreate} {custom_table_name?}';
 
     /**
      * The console command description.
