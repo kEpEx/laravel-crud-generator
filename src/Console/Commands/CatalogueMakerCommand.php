@@ -41,48 +41,21 @@ class CatalogueMakerCommand extends Command
      */
     public function handle()
     {
-        $tablename = $this->argument('name');
-        $modelname = ucfirst($tablename);
-        $prefix = \Config::get('database.connections.mysql.prefix');
+        $tablename = strtolower($this->argument('name'));
         $tablename_plural = str_plural($tablename);
+        $prefix = \Config::get('database.connections.mysql.prefix');
 
         $this->info('Creating catalogue for table: '.$tablename);
-        $this->info('Model Name: '.$modelname);
+        $this->info('Model Name: '.ucfirst($tablename));
         
-        $modelpath = app_path().'/'.$modelname.'.php';
         if($this->option('recreate')) {
-            foreach([
-                    $modelpath,
-                    app_path().'/Http/Controllers/'.$modelname.'Controller.php',
-                    base_path().'/resources/views/'.$tablename_plural.'/index.blade.php',
-                    base_path().'/resources/views/'.$tablename_plural.'/add.blade.php',
-                ] as $path) {
-                if(file_exists($path)) { 
-                    unlink($path);    
-                    $this->info('Deleted: '.$path);
-                }   
-            }
+            $this->deletePreviousFiles($tablename);
         }
 
-        $exitCode = Artisan::call('make:model', ['name' => $modelname]);
-
-        if($this->argument('custom_table_name') || $this->option('singular')) {
-            $custom_table = $this->argument('custom_table_name');
-            if($custom_table == null) { $custom_table = str_singular($tablename); }  
-            $this->info('Custom table name: '.$prefix.$custom_table);
-
-            
-            $content = file_get_contents($modelpath);
-            $newcontent = substr($content, 0, strlen($content)-2)."    protected \$table = '".$custom_table."';\n}";
-            file_put_contents($modelpath, $newcontent);
-
-        }
-        //$propers = get_class_vars('Tipocosto');
-
-        $modelfull = '\App\\'.$modelname;
-        $this->info('Example data: '.$modelfull::first());
-
+        $this->createModel($tablename, $prefix, $this->option('singular'), $this->argument('custom_table_name'));
         
+        $modelfull = '\App\\'.ucfirst($tablename);
+        $this->info('Example data: '.$modelfull::first());
 
         if(!is_dir(base_path().'/resources/views/'.$tablename_plural)) { 
             $this->info('Creating directory: '.base_path().'/resources/views/'.$tablename_plural);
@@ -90,34 +63,73 @@ class CatalogueMakerCommand extends Command
         }
         
         $options = [
-                'model_uc' => $modelname,
-                'model_singular' => $tablename,
-                'model_plural' => $tablename_plural
-            ];
-        $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.$modelname.'Controller.php', $options);
-        $this->generateCatalogue('view.index', base_path().'/resources/views/'.$tablename_plural.'/index.blade.php', $options);
-        $this->generateCatalogue('view.add', base_path().'/resources/views/'.$tablename_plural.'/add.blade.php', $options);
+            'model_uc' => ucfirst($tablename),
+            'model_singular' => $tablename,
+            'model_plural' => $tablename_plural,
+            'tablename' => $this->option('singular') ? str_singular($tablename) : ($this->argument('custom_table_name') ?: $tablename),
+            'prefix' => $prefix,
+            'columns' => $this->getColumnNames($prefix.$tablename)
+        ];
         
+        $this->generateFilesFromTemplates($tablename, $options);
 
-        $addroute = 'Route::controller(\'/'.$tablename_plural.'\', \''.$modelname.'Controller\');';
-        $routing = file_get_contents(app_path().'/Http/routes.php');
-        if(!str_contains($routing, $addroute)) {
-            $newcontent = $routing."\n".$addroute;
-            file_put_contents(app_path().'/Http/routes.php', $newcontent);    
+        $addroute = 'Route::controller(\'/'.$tablename_plural.'\', \''.ucfirst($tablename).'Controller\');';
+        $this->appendToEndOfFile(app_path().'/Http/routes.php', "\n".$addroute, 0, true);
+        
+        
+    }
+
+    protected function getColumnNames($tablename) {
+        $cols = DB::select("show columns from ".$tablename);
+        $ret = [];
+        foreach ($cols as $c) {
+            $ret[] = $c->Field;
         }
-        
+        return $ret;
+    }
 
-        //$headers = ['Name', 'Email'];
-        //$users = App\User::all(['name', 'email'])->toArray();
+    protected function generateFilesFromTemplates($tablename, $options) {
 
-        //$this->table($headers, $users);
-        //$this->info('Properties: '.print_r($propers, true));
+        $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php', $options);
+        $this->generateCatalogue('view.add', base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php', $options);
+        $htmlcolumns = "";
+        foreach ($options['columns'] as $col) {
+            $htmlcolumns .= "<th>".$col."</th>";
+        }
+        $options['htmlcolumns'] = $htmlcolumns;
+        $options['num_columns'] = count($options['columns']);
+        $this->generateCatalogue('view.index', base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php', $options);
+    }
+
+    protected function createModel($tablename, $prefix = "", $singular = false, $custom_table = "") {
+        Artisan::call('make:model', ['name' => ucfirst($tablename)]);
+
+        if($singular || $custom_table) {
+            $custom_table = $custom_table == null ? str_singular($tablename) : $this->argument('custom_table_name');
+            $this->info('Custom table name: '.$prefix.$custom_table);
+            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n}", 2);
+        }
+    }
+
+    protected function deletePreviousFiles($tablename) {
+        foreach([
+                app_path().'/'.ucfirst($tablename).'.php',
+                app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php',
+                base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php',
+                base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php',
+            ] as $path) {
+            if(file_exists($path)) { 
+                unlink($path);    
+                $this->info('Deleted: '.$path);
+            }   
+        }
     }
 
     protected function renderWithData($template_path, $data) {
         $template = file_get_contents($template_path);
         foreach (array_keys($data) as $key) {
-            $template = str_replace('{{'.$key.'}}', $data[$key], $template);
+            if(!is_array($data[$key]))
+                $template = str_replace('{{'.$key.'}}', $data[$key], $template);
         }
         return $template;
     }
@@ -127,6 +139,14 @@ class CatalogueMakerCommand extends Command
         file_put_contents($destination_path, $c);
         $this->info('Created Controller: '.$destination_path);
 
+    }
+
+    protected function appendToEndOfFile($path, $text, $remove_last_chars = 0, $dont_add_if_exist = false) {
+        $content = file_get_contents($path);
+        if(!str_contains($content, $text) || !$dont_add_if_exist) {
+            $newcontent = substr($content, 0, strlen($content)-$remove_last_chars).$text;
+            file_put_contents($path, $newcontent);    
+        }
     }
 }
 

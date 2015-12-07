@@ -3,50 +3,63 @@
 @section('content')
 
 
-    <!-- Current Tasks -->
-    @if (count(${{model_plural}}) > 0)
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Current Tasks
-            </div>
+<h2 class="page-header">{{ ucfirst('{{model_plural}}') }}</h2>
 
-            <div class="panel-body">
-                <table class="table table-striped task-table">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        List of {{ ucfirst('{{model_plural}}') }}
+    </div>
 
-                    <!-- Table Headings -->
-                    <thead>
-                        <th>Task</th>
-                        <th>Usuario</th>
-                        <th>&nbsp;</th>
-                    </thead>
-
-                    <!-- Table Body -->
-                    <tbody>
-                        @foreach (${{model_plural}} as $d)
-                            <tr>
-                                <!-- Task Name -->
-                                <td class="table-text">
-                                    <div>{{ $d->name }}</div>
-                                </td>
-                                <td class="table-text">
-                                    <div>{{ $d->user_name }}</div>
-                                </td>
-
-                                <td>
-                                    <!-- TODO: Delete Button -->
-                                     <form action="{{url('{{model_plural}}/destroy')}}/{{ $d->id }}" method="POST">
-                                        {{ csrf_field() }}
-                                        {{ method_field('DELETE') }}
-
-                                        <button>Delete Task</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+    <div class="panel-body">
+        <div class="">
+            <table class="table table-striped" id="thegrid">
+              <thead>
+                <tr>
+                  {{htmlcolumns}}
+                  <th>Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
         </div>
-    @endif
 
+    </div>
+</div>
+
+
+
+     
+
+
+
+@endsection
+
+
+
+@section('scripts')
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#thegrid').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ordering": false,
+                "ajax": "{{url('{{model_plural}}/grid')}}",
+                "columnDefs": [
+                    {
+                        "render": function ( data, type, row ) {
+                            return '<a href="{{url('{{model_plural}}/modify')}}/'+row[0]+'">'+data +'</a>';
+                        },
+                        "targets": 1
+                    },
+                    {
+                        "render": function ( data, type, row ) {
+                            return '<a href="{{url('{{model_plural}}/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
+                        },
+                        "targets": {{num_columns}}
+                    },
+                ]
+            });
+        });
+    </script>
 @endsection

@@ -38,6 +38,47 @@ class {{model_uc}}Controller extends Controller
 	    ]);
 	}
 
+	public function getGrid(Request $request)
+	{
+		$len = $_GET['length'];
+		$start = $_GET['start'];
+
+		$select = "SELECT * ";
+		$presql = " FROM {{prefix}}{{tablename}} a ";
+		if($_GET['search']['value']) {	
+			$sql .= " WHERE a.name LIKE '%".$_GET['search']['value']."%' ";
+		}
+		
+		$presql .= "  ";
+
+		$sql = $select.$presql." LIMIT ".$start.",".$len;
+
+
+		$qcount = DB::select("SELECT COUNT(a.id) c".$presql);
+		//print_r($qcount);
+		$count = $qcount[0]->c;
+
+		$results = DB::select($sql);
+		$ret = [];
+		foreach ($results as $row) {
+			$r = [];
+			foreach ($row as $value) {
+				$r[] = $value;
+			}
+			$ret[] = $r;
+		}
+
+		$ret['data'] = $ret;
+		$ret['recordsTotal'] = $count;
+		$ret['iTotalDisplayRecords'] = $count;
+
+		$ret['recordsFiltered'] = count($ret);
+		$ret['draw'] = $_GET['draw'];
+
+		echo json_encode($ret);
+
+	}
+
 
 	public function postIndex(Request $request) {
 	    //
@@ -50,25 +91,25 @@ class {{model_uc}}Controller extends Controller
 	    //${{model_singular}}->user_id = $request->user()->id;
 	    ${{model_singular}}->save();
 
-	    return redirect('/{{model_plural}}.index');
+	    return redirect('/{{model_plural}}.add');
 
 	}
 
-	public function deleteDestroy(Request $request, $id) {
+	public function getDelete(Request $request, $id) {
 		
 		${{model_singular}} = {{model_uc}}::findOrFail($id);
 
-		if($request->user()->id == ${{model_singular}}->user_id) {
-			 ${{model_singular}}->delete();
-			 return redirect('/{{model_plural}}.index');
-		}
-		else {
-			//print_r(${{model_singular}});
-			//return view('{{model_plural}}');
-			return redirect('/{{model_plural}}.index?error');	
-		}
+		${{model_singular}}->delete();
+		return redirect('/{{model_plural}}.index');
 	    
 	}
 
+	public function getModify(Request $request, $id) {
+		
+		${{model_singular}} = {{model_uc}}::findOrFail($id);
 
+		
+		return view('/{{model_plural}}.add');
+	    
+	}
 }
