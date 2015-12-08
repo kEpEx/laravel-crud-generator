@@ -18,14 +18,15 @@
                     [[foreach:columns]]
                         <th>[[i]]</th>
                     [[endforeach]]
-                  <th>Delete</th>
+                    <th style="width:50px"></th>
+                    <th style="width:50px"></th>
                 </tr>
               </thead>
               <tbody>
               </tbody>
             </table>
         </div>
-
+        <a href="{{url('[[model_plural]]/add')}}" class="btn btn-primary" role="button">Add [[model_singular]]</a>
     </div>
 </div>
 
@@ -53,9 +54,15 @@
                     },
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
+                            return '<a href="{{url('[[model_plural]]/update')}}/'+row[0]+'" class="btn btn-default">Update</a>';
                         },
                         "targets": [[num_columns]]
+                    },
+                    {
+                        "render": function ( data, type, row ) {
+                            return '<a href="{{url('[[model_plural]]/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
+                        },
+                        "targets": [[num_columns]]+1
                     },
                 ]
             });

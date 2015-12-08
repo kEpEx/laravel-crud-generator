@@ -68,8 +68,9 @@ class CrudGeneratorCommand extends Command
             'model_plural' => $tablename_plural,
             'tablename' => $this->option('singular') ? str_singular($tablename) : ($this->argument('custom_table_name') ?: $tablename),
             'prefix' => $prefix,
-            'columns' => $this->getColumnNames($prefix.$tablename)
+            'columns' => $this->getColumnNames($prefix.$tablename),
         ];
+        $options['num_columns'] = count($options['columns']);
         
         $this->generateFilesFromTemplates($tablename, $options);
 
@@ -92,12 +93,7 @@ class CrudGeneratorCommand extends Command
 
         $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php', $options);
         $this->generateCatalogue('view.add', base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php', $options);
-        $htmlcolumns = "";
-        foreach ($options['columns'] as $col) {
-            $htmlcolumns .= "<th>".$col."</th>";
-        }
-        $options['htmlcolumns'] = $htmlcolumns;
-        $options['num_columns'] = count($options['columns']);
+        $this->generateCatalogue('view.show', base_path().'/resources/views/'.str_plural($tablename).'/show.blade.php', $options);
         $this->generateCatalogue('view.index', base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php', $options);
     }
 
@@ -117,6 +113,7 @@ class CrudGeneratorCommand extends Command
                 app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php',
                 base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php',
                 base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php',
+                base_path().'/resources/views/'.str_plural($tablename).'/show.blade.php',
             ] as $path) {
             if(file_exists($path)) { 
                 unlink($path);    

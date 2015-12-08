@@ -38,12 +38,28 @@ class [[model_uc]]Controller extends Controller
 	    ]);
 	}
 
+	public function getUpdate(Request $request)
+	{
+		
+	    return view('[[model_plural]].add', [
+	        
+	    ]);
+	}
+
+	public function getShow(Request $request)
+	{
+		
+	    return view('[[model_plural]].show', [
+	        
+	    ]);
+	}
+
 	public function getGrid(Request $request)
 	{
 		$len = $_GET['length'];
 		$start = $_GET['start'];
 
-		$select = "SELECT * ";
+		$select = "SELECT *,1,2 ";
 		$presql = " FROM [[prefix]][[tablename]] a ";
 		if($_GET['search']['value']) {	
 			$presql .= " WHERE a.name LIKE '%".$_GET['search']['value']."%' ";
