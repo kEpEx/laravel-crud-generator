@@ -127,10 +127,51 @@ class CrudGeneratorCommand extends Command
 
     protected function renderWithData($template_path, $data) {
         $template = file_get_contents($template_path);
-        foreach (array_keys($data) as $key) {
-            if(!is_array($data[$key]))
-                $template = str_replace('{{'.$key.'}}', $data[$key], $template);
-        }
+        $template = $this->renderForeachs($template, $data);
+        $template = $this->renderVariables($template, $data);
+        return $template;
+    }
+
+    protected function renderVariables($template, $data) {
+        $callback = function ($matches) use($data) {
+            if(array_key_exists($matches[1], $data)) {
+                return $data[$matches[1]];
+            }
+            return $matches[1];
+        };
+        $template = preg_replace_callback('/\[\[\s*(.+?)\s*\]\](\r?\n)?/s', $callback, $template);
+        return $template;
+    }
+
+    protected function renderForeachs($template, $data) {
+        $callback = function ($matches) use($data) {
+            $rep = $matches[0];
+            $rep = preg_replace('/\[\[\s*foreach:\s*(.+?)\s*\]\](\r?\n)?/s', '', $rep);
+            $rep = preg_replace('/\[\[\s*endforeach\s*\]\](\r?\n)?/s', '', $rep);
+            $ret = '';
+            if(array_key_exists($matches[1], $data) && is_array($data[$matches[1]])) {
+
+                $parent = $data[$matches[1]];
+                foreach ($parent as $i) {
+                    $d = [];
+                    if(is_array($i)) {
+                        foreach ($i as $key => $value) {
+                            $d['i.'.$key] = $value;
+                        }
+                    }
+                    else {
+                        $d['i'] = $i;
+                    }
+                    $ret .= $this->renderVariables($rep, $d);
+                }
+                return $ret;
+            }
+            else {
+                return $rep;    
+            }
+            
+        };
+        $template = preg_replace_callback('/\[\[\s*foreach:\s*(.+?)\s*\]\](\r?\n)?((?!endforeach).)*\[\[\s*endforeach\s*\]\](\r?\n)?/s', $callback, $template);
         return $template;
     }
 

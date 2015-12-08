@@ -3,11 +3,11 @@
 @section('content')
 
 
-<h2 class="page-header">{{ ucfirst('{{model_plural}}') }}</h2>
+<h2 class="page-header">{{ ucfirst('[[model_plural]]') }}</h2>
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        List of {{ ucfirst('{{model_plural}}') }}
+        List of {{ ucfirst('[[model_plural]]') }}
     </div>
 
     <div class="panel-body">
@@ -15,7 +15,9 @@
             <table class="table table-striped" id="thegrid">
               <thead>
                 <tr>
-                  {{htmlcolumns}}
+                    [[foreach:columns]]
+                        <th>[[i]]</th>
+                    [[endforeach]]
                   <th>Delete</th>
                 </tr>
               </thead>
@@ -27,9 +29,6 @@
     </div>
 </div>
 
-
-
-     
 
 
 
@@ -44,19 +43,19 @@
                 "processing": true,
                 "serverSide": true,
                 "ordering": false,
-                "ajax": "{{url('{{model_plural}}/grid')}}",
+                "ajax": "{{url('[[model_plural]]/grid')}}",
                 "columnDefs": [
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('{{model_plural}}/modify')}}/'+row[0]+'">'+data +'</a>';
+                            return '<a href="{{url('[[model_plural]]/modify')}}/'+row[0]+'">'+data +'</a>';
                         },
                         "targets": 1
                     },
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('{{model_plural}}/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
+                            return '<a href="{{url('[[model_plural]]/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
                         },
-                        "targets": {{num_columns}}
+                        "targets": [[num_columns]]
                     },
                 ]
             });
