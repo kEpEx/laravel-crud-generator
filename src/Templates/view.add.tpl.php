@@ -1,4 +1,4 @@
-@extends('crudgenerator::layouts.master')
+@extends('[[custom_master]]')
 
 @section('content')
 
