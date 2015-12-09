@@ -100,7 +100,8 @@ class CrudGeneratorCommand extends Command
 
     protected function getTypeFromDBType($dbtype) {
         if(str_contains($dbtype, 'varchar')) { return 'text'; }
-        if(str_contains($dbtype, 'int')) { return 'number'; }
+        if(str_contains($dbtype, 'int') || str_contains($dbtype, 'float')) { return 'number'; }
+        if(str_contains($dbtype, 'date')) { return 'date'; }
         return 'unknown';
     }
 
