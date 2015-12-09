@@ -53,6 +53,11 @@ class CrudGeneratorCommand extends Command
         }
 
         $this->createModel($tablename, $prefix, $this->option('singular'), $this->argument('custom_table_name'));
+        $columns = $this->getColumn($prefix.$tablename);
+        $cc = collect($columns);
+        if(!$cc->contains('name', 'updated_at') || !$cc->contains('name', 'created_at')) { 
+            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    public \$timestamps = false;\n\n}", 2);
+        }
         
         $modelfull = '\App\\'.ucfirst($tablename);
         $this->info('Example data: '.$modelfull::first());
@@ -68,9 +73,10 @@ class CrudGeneratorCommand extends Command
             'model_plural' => $tablename_plural,
             'tablename' => $this->option('singular') ? str_singular($tablename) : ($this->argument('custom_table_name') ?: $tablename),
             'prefix' => $prefix,
-            'columns' => $this->getColumnNames($prefix.$tablename),
+            'columns' => $columns,
+            'first_column_nonid' => count($columns) > 1 ? $columns[1]['name'] : '',
+            'num_columns' => count($columns)
         ];
-        $options['num_columns'] = count($options['columns']);
         
         $this->generateFilesFromTemplates($tablename, $options);
 
@@ -80,13 +86,22 @@ class CrudGeneratorCommand extends Command
         
     }
 
-    protected function getColumnNames($tablename) {
+    protected function getColumn($tablename) {
         $cols = DB::select("show columns from ".$tablename);
         $ret = [];
         foreach ($cols as $c) {
-            $ret[] = $c->Field;
+            $cadd = [];
+            $cadd['name'] = $c->Field;
+            $cadd['type'] = $c->Field == 'id' ? 'id' : $this->getTypeFromDBType($c->Type);
+            $ret[] = $cadd;
         }
         return $ret;
+    }
+
+    protected function getTypeFromDBType($dbtype) {
+        if(str_contains($dbtype, 'varchar')) { return 'text'; }
+        if(str_contains($dbtype, 'int')) { return 'number'; }
+        return 'unknown';
     }
 
     protected function generateFilesFromTemplates($tablename, $options) {
@@ -103,7 +118,7 @@ class CrudGeneratorCommand extends Command
         if($singular || $custom_table) {
             $custom_table = $custom_table == null ? str_singular($tablename) : $this->argument('custom_table_name');
             $this->info('Custom table name: '.$prefix.$custom_table);
-            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n}", 2);
+            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n\n}", 2);
         }
     }
 
@@ -125,6 +140,7 @@ class CrudGeneratorCommand extends Command
     protected function renderWithData($template_path, $data) {
         $template = file_get_contents($template_path);
         $template = $this->renderForeachs($template, $data);
+        $template = $this->renderIFs($template, $data);
         $template = $this->renderVariables($template, $data);
         return $template;
     }
@@ -134,7 +150,7 @@ class CrudGeneratorCommand extends Command
             if(array_key_exists($matches[1], $data)) {
                 return $data[$matches[1]];
             }
-            return $matches[1];
+            return $matches[0];
         };
         $template = preg_replace_callback('/\[\[\s*(.+?)\s*\]\](\r?\n)?/s', $callback, $template);
         return $template;
@@ -159,16 +175,49 @@ class CrudGeneratorCommand extends Command
                     else {
                         $d['i'] = $i;
                     }
-                    $ret .= $this->renderVariables($rep, $d);
+                    $rep2 = $this->renderIFs($rep, array_merge($d, $data));
+                    $rep2 = $this->renderVariables($rep2, array_merge($d, $data));
+                    $ret .= $rep2;
                 }
                 return $ret;
             }
             else {
-                return $rep;    
+                return $mat;    
             }
             
         };
         $template = preg_replace_callback('/\[\[\s*foreach:\s*(.+?)\s*\]\](\r?\n)?((?!endforeach).)*\[\[\s*endforeach\s*\]\](\r?\n)?/s', $callback, $template);
+        return $template;
+    }
+
+    protected function getValFromExpression($exp, $data) {
+        if(str_contains($exp, "'")) {
+            return trim($exp,"'");    
+        }
+        else {
+            if(array_key_exists($exp, $data)) {
+                return $data[$exp];
+            }
+            else return null;
+        }
+    }
+
+    protected function renderIFs($template, $data) {
+        $callback = function ($matches) use($data) {
+            $rep = $matches[0];
+            $rep = preg_replace('/\[\[\s*if:\s*(.+?)\s*([!=]=)\s*(.+?)\s*\]\](\r?\n)?/s', '', $rep);
+            $rep = preg_replace('/\[\[\s*endif\s*\]\](\r?\n)?/s', '', $rep);
+            $ret = '';
+            $ret .= '<!-- if('.$matches[1].' '.$matches[2].' '.$matches[3].'-->';
+            $ret .= '<!-- if('.$this->getValFromExpression($matches[1], $data).' '.$matches[2].' '.$this->getValFromExpression($matches[3], $data).'-->';
+            $val1 = $this->getValFromExpression($matches[1], $data);
+            $val2 = $this->getValFromExpression($matches[3], $data);
+            if($matches[2] == '==' && $val1 == $val2) { $ret .= $rep; }
+            if($matches[2] == '!=' && $val1 != $val2) { $ret .= $rep; }
+            $ret .= '<!-- endif -->';
+            return $ret;
+        };
+        $template = preg_replace_callback('/\[\[\s*if:\s*(.+?)\s*([!=]=)\s*(.+?)\s*\]\](\r?\n)?((?!endif).)*\[\[\s*endif\s*\]\](\r?\n)?/s', $callback, $template);
         return $template;
     }
 

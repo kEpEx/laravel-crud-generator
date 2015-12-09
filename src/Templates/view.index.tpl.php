@@ -16,7 +16,7 @@
               <thead>
                 <tr>
                     [[foreach:columns]]
-                        <th>[[i]]</th>
+                        <th>[[i.name]]</th>
                     [[endforeach]]
                     <th style="width:50px"></th>
                     <th style="width:50px"></th>
@@ -39,8 +39,9 @@
 
 @section('scripts')
     <script type="text/javascript">
+        var theGrid = null;
         $(document).ready(function(){
-            $('#thegrid').DataTable({
+            theGrid = $('#thegrid').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "ordering": false,
@@ -48,7 +49,7 @@
                 "columnDefs": [
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/modify')}}/'+row[0]+'">'+data +'</a>';
+                            return '<a href="{{url('[[model_plural]]/show')}}/'+row[0]+'">'+data +'</a>';
                         },
                         "targets": 1
                     },
@@ -60,12 +61,21 @@
                     },
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/delete')}}/'+row[0]+'" class="btn btn-danger">Delete</a>';
+                            return '<a href="{{url('[[model_plural]]/delete')}}" onclick="return doDelete('+row[0]+')" class="btn btn-danger">Delete</a>';
                         },
                         "targets": [[num_columns]]+1
                     },
                 ]
             });
         });
+        function doDelete(id) {
+            if(confirm('You really want to delete this record?')) {
+               $.ajax('{{url('[[model_plural]]/delete')}}/'+id).success(function() {
+                theGrid.ajax.reload();
+               });
+                
+            }
+            return false;
+        }
     </script>
 @endsection

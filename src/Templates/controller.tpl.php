@@ -32,25 +32,24 @@ class [[model_uc]]Controller extends Controller
 
 	public function getAdd(Request $request)
 	{
-		
 	    return view('[[model_plural]].add', [
 	        
 	    ]);
 	}
 
-	public function getUpdate(Request $request)
+	public function getUpdate(Request $request, $id)
 	{
-		
+		$[[model_singular]] = [[model_uc]]::findOrFail($id);
 	    return view('[[model_plural]].add', [
-	        
+	        'model' => $[[model_singular]]
 	    ]);
 	}
 
-	public function getShow(Request $request)
+	public function getShow(Request $request, $id)
 	{
-		
+		$[[model_singular]] = [[model_uc]]::findOrFail($id);
 	    return view('[[model_plural]].show', [
-	        
+	        'model' => $[[model_singular]]
 	    ]);
 	}
 
@@ -62,7 +61,7 @@ class [[model_uc]]Controller extends Controller
 		$select = "SELECT *,1,2 ";
 		$presql = " FROM [[prefix]][[tablename]] a ";
 		if($_GET['search']['value']) {	
-			$presql .= " WHERE a.name LIKE '%".$_GET['search']['value']."%' ";
+			$presql .= " WHERE [[first_column_nonid]] LIKE '%".$_GET['search']['value']."%' ";
 		}
 		
 		$presql .= "  ";
@@ -96,18 +95,21 @@ class [[model_uc]]Controller extends Controller
 	}
 
 
-	public function postIndex(Request $request) {
+	public function postSave(Request $request) {
 	    //
-	    $this->validate($request, [
+	    /*$this->validate($request, [
 	        'name' => 'required|max:255',
-	    ]);
+	    ]);*/
 
 	    $[[model_singular]] = new [[model_uc]];
-	    $[[model_singular]]->name = $request->name;
+
+	    [[foreach:columns]]
+	    $[[model_singular]]->[[i.name]] = $request->[[i.name]];
+	    [[endforeach]]
 	    //$[[model_singular]]->user_id = $request->user()->id;
 	    $[[model_singular]]->save();
 
-	    return redirect('/[[model_plural]].add');
+	    return redirect('/[[model_plural]]/index');
 
 	}
 
@@ -116,16 +118,9 @@ class [[model_uc]]Controller extends Controller
 		$[[model_singular]] = [[model_uc]]::findOrFail($id);
 
 		$[[model_singular]]->delete();
-		return redirect('/[[model_plural]].index');
+		return redirect('/[[model_plural]]/index');
 	    
 	}
 
-	public function getModify(Request $request, $id) {
-		
-		$[[model_singular]] = [[model_uc]]::findOrFail($id);
-
-		
-		return view('/[[model_plural]].add');
-	    
-	}
+	
 }
