@@ -42,36 +42,43 @@ class CrudGeneratorCommand extends Command
     public function handle()
     {
         $tablename = strtolower($this->argument('name'));
-        $tablename_plural = str_plural($tablename);
         $prefix = \Config::get('database.connections.mysql.prefix');
+        $custom_table_name = $this->argument('custom_table_name');
+        $tablenames = [];
 
+        if($tablename == 'all') {
+            DB::setFetchMode(\PDO::FETCH_NUM);
+            $tables = DB::select("show tables");
+            foreach ($tables as $t) {
+                if(str_contains($t[0], $prefix))
+                    $tablenames[] = substr($t[0], strlen($prefix));
+            }
+            $custom_table_name = null;
+        }
+        else {
+            $tablenames = [$tablename];
+        }
+
+        foreach ($tablenames as $table) {
+            //$this->info($table);
+            $this->createCRUDFor($table, $prefix, $this->option('singular'), $custom_table_name, $this->option('recreate'));    
+        }
+
+    }
+
+    protected function createCRUDFor($tablename, $prefix, $singular, $custom_table_name, $recreate) {
+        $this->info('');
         $this->info('Creating catalogue for table: '.$tablename);
         $this->info('Model Name: '.ucfirst($tablename));
-        
-        if($this->option('recreate')) {
-            $this->deletePreviousFiles($tablename);
-        }
 
-        $this->createModel($tablename, $prefix, $this->option('singular'), $this->argument('custom_table_name'));
-        $columns = $this->getColumn($prefix.$tablename);
-        $cc = collect($columns);
-        if(!$cc->contains('name', 'updated_at') || !$cc->contains('name', 'created_at')) { 
-            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    public \$timestamps = false;\n\n}", 2);
-        }
-        
-        $modelfull = '\App\\'.ucfirst($tablename);
-        $this->info('Example data: '.$modelfull::first());
+        if($recreate) { $this->deletePreviousFiles($tablename); }
+        $columns = $this->createModel($tablename, $prefix, $singular, $custom_table_name);
 
-        if(!is_dir(base_path().'/resources/views/'.$tablename_plural)) { 
-            $this->info('Creating directory: '.base_path().'/resources/views/'.$tablename_plural);
-            mkdir( base_path().'/resources/views/'.$tablename_plural ); 
-        }
-        
         $options = [
             'model_uc' => ucfirst($tablename),
             'model_singular' => $tablename,
-            'model_plural' => $tablename_plural,
-            'tablename' => $this->option('singular') ? str_singular($tablename) : ($this->argument('custom_table_name') ?: $tablename),
+            'model_plural' => str_plural($tablename),
+            'tablename' => $singular ? str_singular($tablename) : ($custom_table_name ?: $tablename),
             'prefix' => $prefix,
             'columns' => $columns,
             'first_column_nonid' => count($columns) > 1 ? $columns[1]['name'] : '',
@@ -80,10 +87,8 @@ class CrudGeneratorCommand extends Command
         
         $this->generateFilesFromTemplates($tablename, $options);
 
-        $addroute = 'Route::controller(\'/'.$tablename_plural.'\', \''.ucfirst($tablename).'Controller\');';
+        $addroute = 'Route::controller(\'/'.str_plural($tablename).'\', \''.ucfirst($tablename).'Controller\');';
         $this->appendToEndOfFile(app_path().'/Http/routes.php', "\n".$addroute, 0, true);
-        
-        
     }
 
     protected function getColumn($tablename) {
@@ -106,7 +111,10 @@ class CrudGeneratorCommand extends Command
     }
 
     protected function generateFilesFromTemplates($tablename, $options) {
-
+        if(!is_dir(base_path().'/resources/views/'.str_plural($tablename))) { 
+            $this->info('Creating directory: '.base_path().'/resources/views/'.str_plural($tablename));
+            mkdir( base_path().'/resources/views/'.str_plural($tablename)); 
+        }
         $this->generateCatalogue('controller', app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php', $options);
         $this->generateCatalogue('view.add', base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php', $options);
         $this->generateCatalogue('view.show', base_path().'/resources/views/'.str_plural($tablename).'/show.blade.php', $options);
@@ -121,6 +129,13 @@ class CrudGeneratorCommand extends Command
             $this->info('Custom table name: '.$prefix.$custom_table);
             $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n\n}", 2);
         }
+        $columns = $this->getColumn($prefix.$tablename);
+        $cc = collect($columns);
+        if(!$cc->contains('name', 'updated_at') || !$cc->contains('name', 'created_at')) { 
+            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    public \$timestamps = false;\n\n}", 2);
+        }
+        $this->info('Model created, columns: '.json_encode($columns));
+        return $columns;
     }
 
     protected function deletePreviousFiles($tablename) {

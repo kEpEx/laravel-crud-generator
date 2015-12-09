@@ -62,7 +62,8 @@
                 <div class="col-sm-offset-3 col-sm-6">
                     <button type="submit" class="btn btn-success">
                         <i class="fa fa-plus"></i> Save
-                    </button>
+                    </button> 
+                    <a class="btn btn-default" href="{{ url('/[[model_plural]]') }}"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
                 </div>
             </div>
         </form>
