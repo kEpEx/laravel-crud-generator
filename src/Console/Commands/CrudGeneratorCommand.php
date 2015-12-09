@@ -102,13 +102,14 @@ class CrudGeneratorCommand extends Command
         $this->appendToEndOfFile(app_path().'/Http/routes.php', "\n".$addroute, 0, true);
     }
 
-    protected function getColumn($tablename) {
+    protected function getColumns($tablename) {
         $cols = DB::select("show columns from ".$tablename);
         $ret = [];
         foreach ($cols as $c) {
             $cadd = [];
             $cadd['name'] = $c->Field;
             $cadd['type'] = $c->Field == 'id' ? 'id' : $this->getTypeFromDBType($c->Type);
+            $cadd['display'] = ucwords(str_replace('_', ' ', $c->Field));
             $ret[] = $cadd;
         }
         return $ret;
@@ -142,7 +143,7 @@ class CrudGeneratorCommand extends Command
             $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n\n}", 2);
         }
 
-        $columns = $this->getColumn($prefix.$tablename);
+        $columns = $this->getColumns($prefix.$tablename);
 
         $cc = collect($columns);
 

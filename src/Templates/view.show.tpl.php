@@ -17,7 +17,7 @@
         [[foreach:columns]]
         
         <div class="form-group">
-            <label for="[[i.name]]" class="col-sm-3 control-label">[[i.name]]</label>
+            <label for="[[i.name]]" class="col-sm-3 control-label">[[i.display]]</label>
             <div class="col-sm-6">
                 <input type="text" name="[[i.name]]" id="[[i.name]]" class="form-control" value="{{$model['[[i.name]]'] or ''}}" readonly="readonly">
             </div>
