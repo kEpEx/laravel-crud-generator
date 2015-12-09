@@ -33,7 +33,7 @@ class [[model_uc]]Controller extends Controller
 	public function getAdd(Request $request)
 	{
 	    return view('[[model_plural]].add', [
-	        
+	        []
 	    ]);
 	}
 
@@ -100,8 +100,12 @@ class [[model_uc]]Controller extends Controller
 	    /*$this->validate($request, [
 	        'name' => 'required|max:255',
 	    ]);*/
-
-	    $[[model_singular]] = new [[model_uc]];
+		$[[model_singular]] = null;
+		if($request->id > 0) { $[[model_singular]] = [[model_uc]]::findOrFail($request->id); }
+		else { 
+			$[[model_singular]] = new [[model_uc]];
+		}
+	    
 
 	    [[foreach:columns]]
 	    $[[model_singular]]->[[i.name]] = $request->[[i.name]];

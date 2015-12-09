@@ -20,7 +20,7 @@
             <div class="form-group">
                 <label for="[[i.name]]" class="col-sm-3 control-label">[[i.name]]</label>
                 <div class="col-sm-6">
-                    <input type="text" name="[[i.name]]" id="[[i.name]]" class="form-control" readonly="readonly">
+                    <input type="text" name="[[i.name]]" id="[[i.name]]" class="form-control" value="{{$model['[[i.name]]'] or ''}}" readonly="readonly">
                 </div>
             </div>
             [[endif]]
@@ -28,7 +28,7 @@
             <div class="form-group">
                 <label for="[[i.name]]" class="col-sm-3 control-label">[[i.name]]</label>
                 <div class="col-sm-6">
-                    <input type="text" name="[[i.name]]" id="[[i.name]]" class="form-control">
+                    <input type="text" name="[[i.name]]" id="[[i.name]]" class="form-control" value="{{$model['[[i.name]]'] or ''}}">
                 </div>
             </div>
             [[endif]]
