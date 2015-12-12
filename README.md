@@ -1,6 +1,5 @@
 # laravel-crud-generator
 
-####*Still on development*
 
 php artisan command to generate fully working crud with grid paginated server side only by having database tables
 
@@ -24,4 +23,8 @@ CRUD for students table
 
 or the whole database
 
-	php artisan make:crud all "" layouts.master 
+	php artisan make:crud all
+
+whole database with custom layout
+
+	php artisan make:crud all "" layouts.master 	
