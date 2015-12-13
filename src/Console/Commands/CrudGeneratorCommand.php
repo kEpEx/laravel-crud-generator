@@ -122,6 +122,8 @@ class CrudGeneratorCommand extends Command
         return 'unknown';
     }
 
+
+
     protected function generateFilesFromTemplates($tablename, $options) {
         if(!is_dir(base_path().'/resources/views/'.str_plural($tablename))) { 
             $this->info('Creating directory: '.base_path().'/resources/views/'.str_plural($tablename));
@@ -255,10 +257,16 @@ class CrudGeneratorCommand extends Command
     }
 
     protected function generateCatalogue($template_name, $destination_path, $options) {
-        $c = $this->renderWithData(__DIR__.'/../../Templates/'.$template_name.'.tpl.php', $options);
+        $c = $this->renderWithData($this->customTemplateOfDefault($template_name), $options);
         file_put_contents($destination_path, $c);
         $this->info('Created Controller: '.$destination_path);
 
+    }
+
+    protected function customTemplateOfDefault($template_name) {
+        $trypath = base_path().'/resources/templates/'.$template_name.'.tpl.php';
+        if(file_exists($trypath)) return $trypath;
+        return __DIR__.'/../../Templates/'.$template_name.'.tpl.php';
     }
 
     protected function appendToEndOfFile($path, $text, $remove_last_chars = 0, $dont_add_if_exist = false) {
