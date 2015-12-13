@@ -14,6 +14,9 @@ Add to config/app.php the following line to the 'providers' array:
     CrudGenerator\CrudGeneratorServiceProvider::class,
 
 
+![Preview](https://raw.githubusercontent.com/kEpEx/laravel-crud-generator/master/preview.gif)
+
+
 ###Usage
 
 
