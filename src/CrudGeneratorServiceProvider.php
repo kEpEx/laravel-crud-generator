@@ -16,6 +16,10 @@ class CrudGeneratorServiceProvider extends ServiceProvider
     {
         \Route::get('/testcrudgenerator', function () { echo 'CrudGeneratorServiceProvider: OK'; });
         $this->loadViewsFrom(__DIR__.'/views', 'crudgenerator');
+
+        $this->publishes([
+	        __DIR__.'/Templates' => base_path('resources/templates'),
+	    ]);
     }
 
 
