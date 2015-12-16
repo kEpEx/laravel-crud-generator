@@ -243,13 +243,11 @@ class CrudGeneratorCommand extends Command
             $rep = preg_replace('/\[\[\s*if:\s*(.+?)\s*([!=]=)\s*(.+?)\s*\]\](\r?\n)?/s', '', $rep);
             $rep = preg_replace('/\[\[\s*endif\s*\]\](\r?\n)?/s', '', $rep);
             $ret = '';
-            $ret .= '<!-- if('.$matches[1].' '.$matches[2].' '.$matches[3].'-->';
-            $ret .= '<!-- if('.$this->getValFromExpression($matches[1], $data).' '.$matches[2].' '.$this->getValFromExpression($matches[3], $data).'-->';
             $val1 = $this->getValFromExpression($matches[1], $data);
             $val2 = $this->getValFromExpression($matches[3], $data);
             if($matches[2] == '==' && $val1 == $val2) { $ret .= $rep; }
             if($matches[2] == '!=' && $val1 != $val2) { $ret .= $rep; }
-            $ret .= '<!-- endif -->';
+            
             return $ret;
         };
         $template = preg_replace_callback('/\[\[\s*if:\s*(.+?)\s*([!=]=)\s*(.+?)\s*\]\](\r?\n)?((?!endif).)*\[\[\s*endif\s*\]\](\r?\n)?/s', $callback, $template);
