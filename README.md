@@ -30,4 +30,18 @@ or the whole database
 
 whole database with custom layout
 
-	php artisan make:crud all "" layouts.master 	
+	php artisan make:crud all "" layouts.master 
+
+###Custom Templates
+
+The best power of this plugin relies on you making your own templates and generating the code the way you like
+
+Run this command:
+
+    php artisan vendor:publish
+
+and you will have now in resources/templates/ the files you need to modify
+
+If you want to go back to the default, just delete them
+
+Let me know if you have any questions at twitter @[kEpEx](https://twitter.com/kepex)
