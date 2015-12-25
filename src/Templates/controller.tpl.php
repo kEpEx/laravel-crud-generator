@@ -22,12 +22,7 @@ class [[model_uc]]Controller extends Controller
 
     public function getIndex(Request $request)
 	{
-		//$[[model_plural]] = DB::select("select *,u.name as user_name from [[model_plural]] t join users u on t.user_id=u.id");
-		$[[model_plural]] = [[model_uc]]::orderBy('id', 'desc')->get();
-
-	    return view('[[model_plural]].index', [
-	        '[[model_plural]]' => $[[model_plural]]
-	    ]);
+	    return view('[[model_plural]].index', []);
 	}
 
 	public function getAdd(Request $request)

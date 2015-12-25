@@ -16,7 +16,7 @@
               <thead>
                 <tr>
                     [[foreach:columns]]
-                        <th>[[i.display]]</th>
+                    <th>[[i.display]]</th>
                     [[endforeach]]
                     <th style="width:50px"></th>
                     <th style="width:50px"></th>
