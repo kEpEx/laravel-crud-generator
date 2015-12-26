@@ -7,7 +7,7 @@ php artisan command to generate fully working crud with grid paginated server si
 
 ###Installing
 
-	php composer.phar require kepex/laravel-crud-generator dev-master
+	php composer.phar require kepex/laravel-crud-generator
 
 
 Add to config/app.php the following line to the 'providers' array:
@@ -45,4 +45,4 @@ and you will have now in resources/templates/ the files you need to modify
 
 If you want to go back to the default, just delete them
 
-Let me know if you have any questions at twitter @[kEpEx](https://twitter.com/kepex)
+Let me know if you have any questions or if you find this library useful at twitter @[kEpEx](https://twitter.com/kepex)
