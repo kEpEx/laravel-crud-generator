@@ -15,14 +15,14 @@ class CrudGeneratorCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:crud {name} {--recreate} {custom_table_name?} {custom_master_layout_name?}';
+    protected $signature = 'make:crud {name} {--recreate} {--table-name=} {--master-layout=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create catalogues based on a mysql table instantly';
+    protected $description = 'Create fully functional CRUD code based on a mysql table instantly';
 
     /**
      * Create a new command instance.
@@ -43,7 +43,7 @@ class CrudGeneratorCommand extends Command
     {
         $tablename = strtolower($this->argument('name'));
         $prefix = \Config::get('database.connections.mysql.prefix');
-        $custom_table_name = $this->argument('custom_table_name');
+        $custom_table_name = $this->option('table-name');
         $tablenames = [];
 
         if($tablename == 'all') {
@@ -71,7 +71,7 @@ class CrudGeneratorCommand extends Command
             //$this->info($table);
             $singular = false;
             if($table == str_singular($table)) { $singular = true; }
-            $this->createCRUDFor($table, $prefix, $singular, $custom_table_name, $this->option('recreate'), $this->argument('custom_master_layout_name'));    
+            $this->createCRUDFor($table, $prefix, $singular, $custom_table_name, $this->option('recreate'), $this->option('master-layout'));    
         }
 
     }
@@ -83,12 +83,11 @@ class CrudGeneratorCommand extends Command
 
         if($recreate) { $this->deletePreviousFiles($tablename); }
         $columns = $this->createModel($tablename, $prefix, $singular, $custom_table_name);
-
         $options = [
             'model_uc' => ucfirst($tablename),
             'model_singular' => $tablename,
             'model_plural' => str_plural($tablename),
-            'tablename' => $singular ? str_singular($tablename) : ($custom_table_name ?: $tablename),
+            'tablename' => $custom_table_name ? $custom_table_name : ($singular ? str_singular($tablename) : $tablename),
             'prefix' => $prefix,
             'columns' => $columns,
             'first_column_nonid' => count($columns) > 1 ? $columns[1]['name'] : '',
@@ -138,14 +137,18 @@ class CrudGeneratorCommand extends Command
     protected function createModel($tablename, $prefix = "", $singular = false, $custom_table = "") {
 
         Artisan::call('make:model', ['name' => ucfirst($tablename)]);
+        
 
         if($singular || $custom_table) {
-            $custom_table = $custom_table == null ? str_singular($tablename) : $this->argument('custom_table_name');
+            $custom_table = $custom_table == null ? str_singular($tablename) : $custom_table;    
             $this->info('Custom table name: '.$prefix.$custom_table);
             $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n\n}", 2);
         }
+        else {
+            $custom_table = $tablename;
+        }
 
-        $columns = $this->getColumns($prefix.$tablename);
+        $columns = $this->getColumns($prefix.$custom_table);
 
         $cc = collect($columns);
 
