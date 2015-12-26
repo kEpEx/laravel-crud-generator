@@ -56,7 +56,7 @@ class CrudGeneratorCommand extends Command
             $this->info("List of tables: ".print_r($tables, true));
             
             foreach ($tables as $t) {
-                if(str_contains($t, $prefix))
+                if($prefix == '' || str_contains($t, $prefix))
                     $tablenames[] = strtolower(substr($t, strlen($prefix)));
                 //else 
                     //$tablenames[] = strtolower($t);
