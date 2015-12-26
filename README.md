@@ -31,7 +31,7 @@ or the whole database
 
 whole database with custom layout
 
-	php artisan make:crud all "" layouts.master 
+	php artisan make:crud all --master-layout=layouts.master 
 
 ###Custom Templates
 
