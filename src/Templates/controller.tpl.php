@@ -11,7 +11,7 @@ use App\[[model_uc]];
 
 use DB;
 
-class [[model_uc]]Controller extends Controller
+class [[model_uc_plural]]Controller extends Controller
 {
     //
     public function __construct()

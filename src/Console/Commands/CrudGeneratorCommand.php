@@ -15,7 +15,7 @@ class CrudGeneratorCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:crud {name} {--recreate} {--table-name=} {--master-layout=}';
+    protected $signature = 'make:crud {name} {--recreate} {--table-name=} {--master-layout=} {--existing-model=}';
 
     /**
      * The console command description.
@@ -44,6 +44,8 @@ class CrudGeneratorCommand extends Command
         $tablename = strtolower($this->argument('name'));
         $prefix = \Config::get('database.connections.mysql.prefix');
         $custom_table_name = $this->option('table-name');
+        $existing_model = $this->option('existing-model');
+
         $tablenames = [];
 
         if($tablename == 'all') {
@@ -56,44 +58,59 @@ class CrudGeneratorCommand extends Command
             $this->info("List of tables: ".print_r($tables, true));
             
             foreach ($tables as $t) {
+                // Ignore tables with different prefix
                 if($prefix == '' || str_contains($t, $prefix))
                     $tablenames[] = strtolower(substr($t, strlen($prefix)));
-                //else 
-                    //$tablenames[] = strtolower($t);
             }
+            // Custom table name and existing model, should not have effect for whole database
             $custom_table_name = null;
+            $existing_model = null;
         }
         else {
             $tablenames = [$tablename];
         }
 
         foreach ($tablenames as $table) {
-            //$this->info($table);
-            $singular = false;
-            if($table == str_singular($table)) { $singular = true; }
-            $this->createCRUDFor($table, $prefix, $singular, $custom_table_name, $this->option('recreate'), $this->option('master-layout'));    
+            $this->createCRUDFor(
+                $table, $prefix, 
+                ($table == str_singular($table)), $custom_table_name, 
+                $this->option('recreate'), $this->option('master-layout'),
+                $existing_model
+            );    
         }
 
     }
 
-    protected function createCRUDFor($tablename, $prefix, $singular, $custom_table_name, $recreate, $custom_master) {
+    protected function createCRUDFor($tablename, $prefix, $singular, $custom_table_name, $recreate, $custom_master, $existing_model) {
+        $modelname = ucfirst(str_singular($tablename));
+
         $this->info('');
         $this->info('Creating catalogue for table: '.$tablename);
-        $this->info('Model Name: '.ucfirst($tablename));
+        $this->info('Model Name: '.$modelname);
 
-        if($recreate) { $this->deletePreviousFiles($tablename); }
-        $columns = $this->createModel($tablename, $prefix, $singular, $custom_table_name);
+
         $options = [
-            'model_uc' => ucfirst($tablename),
-            'model_singular' => $tablename,
-            'model_plural' => str_plural($tablename),
+            'model_uc' => $modelname,
+            'model_uc_plural' => str_plural($modelname),
+            'model_singular' => strtolower($modelname),
+            'model_plural' => strtolower(str_plural($modelname)),
             'tablename' => $custom_table_name ? $custom_table_name : ($singular ? str_singular($tablename) : $tablename),
             'prefix' => $prefix,
-            'columns' => $columns,
-            'first_column_nonid' => count($columns) > 1 ? $columns[1]['name'] : '',
-            'num_columns' => count($columns),
             'custom_master' => $custom_master ?: 'crudgenerator::layouts.master',
         ];
+
+        if($recreate) { $this->deletePreviousFiles($tablename, $existing_model); }
+        if($existing_model) {
+            $columns = $this->getColumns($prefix.str_plural($existing_model));
+        }   
+        else {
+            $columns = $this->createModel($modelname, $prefix, $options['tablename']);
+        }
+        
+        $options['columns'] = $columns;
+        $options['first_column_nonid'] = count($columns) > 1 ? $columns[1]['name'] : '';
+        $options['num_columns'] = count($columns);
+        
         
         $this->generateFilesFromTemplates($tablename, $options);
 
@@ -134,18 +151,17 @@ class CrudGeneratorCommand extends Command
         $this->generateCatalogue('view.index', base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php', $options);
     }
 
-    protected function createModel($tablename, $prefix = "", $singular = false, $custom_table = "") {
+    protected function createModel($modelname, $prefix,$table_name) {
 
-        Artisan::call('make:model', ['name' => ucfirst($tablename)]);
+        Artisan::call('make:model', ['name' => $modelname]);
         
 
-        if($singular || $custom_table) {
-            $custom_table = $custom_table == null ? str_singular($tablename) : $custom_table;    
+        if(str_plural(strtolower($modelname)) != $table_name) {
             $this->info('Custom table name: '.$prefix.$custom_table);
-            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    protected \$table = '".$custom_table."';\n\n}", 2);
+            $this->appendToEndOfFile(app_path().'/'.$modelname.'.php', "    protected \$table = '".$table_name."';\n\n}", 2);
         }
         else {
-            $custom_table = $tablename;
+            $custom_table = $table_name;
         }
 
         $columns = $this->getColumns($prefix.$custom_table);
@@ -153,21 +169,24 @@ class CrudGeneratorCommand extends Command
         $cc = collect($columns);
 
         if(!$cc->contains('name', 'updated_at') || !$cc->contains('name', 'created_at')) { 
-            $this->appendToEndOfFile(app_path().'/'.ucfirst($tablename).'.php', "    public \$timestamps = false;\n\n}", 2);
+            $this->appendToEndOfFile(app_path().'/'.$modelname.'.php', "    public \$timestamps = false;\n\n}", 2);
         }
 
         $this->info('Model created, columns: '.json_encode($columns));
         return $columns;
     }
 
-    protected function deletePreviousFiles($tablename) {
-        foreach([
-                app_path().'/'.ucfirst($tablename).'.php',
+    protected function deletePreviousFiles($tablename, $existing_model) {
+        $todelete = [
                 app_path().'/Http/Controllers/'.ucfirst($tablename).'Controller.php',
                 base_path().'/resources/views/'.str_plural($tablename).'/index.blade.php',
                 base_path().'/resources/views/'.str_plural($tablename).'/add.blade.php',
                 base_path().'/resources/views/'.str_plural($tablename).'/show.blade.php',
-            ] as $path) {
+            ];
+        if(!$existing_model) {
+            $todelete[] = app_path().'/'.ucfirst(str_singular($tablename)).'.php'; 
+        }
+        foreach($todelete as $path) {
             if(file_exists($path)) { 
                 unlink($path);    
                 $this->info('Deleted: '.$path);

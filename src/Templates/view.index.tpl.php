@@ -45,6 +45,7 @@
                 "processing": true,
                 "serverSide": true,
                 "ordering": false,
+                "responsive": true,
                 "ajax": "{{url('[[model_plural]]/grid')}}",
                 "columnDefs": [
                     {
