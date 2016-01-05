@@ -13,6 +13,7 @@ class CrudGeneratorFileCreator
     public $path = '';
     public $options = [];
     public $deletePrevious = false;
+    public $output = null;
    
 
  
@@ -22,10 +23,10 @@ class CrudGeneratorFileCreator
     }
 
   
-    public function Generate($template_name, $destination_path, $options) {
-        $c = $this->renderWithData($this->customTemplateOfDefault($template_name), $options);
-        file_put_contents($destination_path, $c);
-        $this->info('Created Controller: '.$destination_path);
+    public function Generate() {
+        $c = $this->renderWithData($this->customTemplateOfDefault($this->templateName), $this->options);
+        file_put_contents($this->path, $c);
+        $this->output->info('Created Controller: '.$this->path);
 
     }
 
@@ -117,7 +118,7 @@ class CrudGeneratorFileCreator
     protected function customTemplateOfDefault($template_name) {
         $trypath = base_path().'/resources/templates/'.$template_name.'.tpl.php';
         if(file_exists($trypath)) return $trypath;
-        return __DIR__.'/../../Templates/'.$template_name.'.tpl.php';
+        return __DIR__.'/Templates/'.$template_name.'.tpl.php';
     }
 
 }

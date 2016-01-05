@@ -13,7 +13,7 @@ class CrudGeneratorCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:crud {model-name} {--recreate} {--singular} {--table-name=} {--master-layout=} {--custom-controller=}';
+    protected $signature = 'make:crud {model-name} {--force} {--singular} {--table-name=} {--master-layout=} {--custom-controller=}';
 
     /**
      * The console command description.
@@ -47,49 +47,59 @@ class CrudGeneratorCommand extends Command
 
         $tocreate = [];
 
-        if($tablename == 'all') {
+        if($modelname == 'all') {
             $pretables = json_decode(json_encode(DB::select("show tables")), true);
             $tables = [];
             foreach($pretables as $p) { 
                 list($key) = array_keys($p);
                 $tables[] = $p[$key]; 
             }
-            $this->info("List of tables: ".print_r($tables, true));
+            $this->info("List of tables: ".implode($tables, ","));
             
             foreach ($tables as $t) {
                 // Ignore tables with different prefix
-                if($prefix == '' || str_contains($t, $prefix))
-                    $tablenames[] = strtolower(substr($t, strlen($prefix)));
+                if($prefix == '' || str_contains($t, $prefix)) { 
+                    $t = strtolower(substr($t, strlen($prefix)));
+                    $toadd = ['modelname'=> str_singular($t), 'tablename'=>''];
+                    if(str_plural($toadd['modelname']) != $t) {
+                        $toadd['tablename'] = $t;
+                    } 
+                    $tocreate[] = $toadd;
+                }
             }
-            // Custom table name and existing model, should not have effect for whole database
+            // Remove options not applicabe for multiples tables
             $custom_table_name = null;
             $custom_controller = null;
+            $singular = null;
         }
         else {
+
             $tocreate = [
-                'modelname'=> $modelname,
+                'modelname' => $modelname,
+                'tablename' => '',
             ];
-            if($modelname == $singular) {
+            if($singular) {
                 $tocreate['tablename'] = $modelname;    
             }
             else if($custom_table_name) { 
                 $tocreate['tablename'] = $custom_table_name; 
             }
-            else { 
-                $tocreate['tablename'] = ''; 
-            }
 
             $tocreate = [$tocreate];
         }
 
+
+
         foreach ($tocreate as $c) {
-            \CrudGenerator\CrudGeneratorService $generator = new \CrudGenerator\CrudGeneratorService();
+            $generator = new \CrudGenerator\CrudGeneratorService();
+            $generator->output = $this;
+
 
             $generator->modelName = ucfirst($c['modelname']);
             $generator->tableName = $c['tablename'];
 
             $generator->prefix = $prefix;
-            $generator->recreate = $this->option('recreate');
+            $generator->force = $this->option('force');
             $generator->layout = $this->option('master-layout');
             $generator->controllerName = ucfirst(strtolower($custom_controller)) ?: str_plural($generator->modelName);
 
