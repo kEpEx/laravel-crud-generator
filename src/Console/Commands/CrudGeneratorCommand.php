@@ -79,7 +79,7 @@ class CrudGeneratorCommand extends Command
                 'tablename' => '',
             ];
             if($singular) {
-                $tocreate['tablename'] = $modelname;    
+                $tocreate['tablename'] = strtolower($modelname);    
             }
             else if($custom_table_name) { 
                 $tocreate['tablename'] = $custom_table_name; 

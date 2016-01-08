@@ -26,7 +26,7 @@
               </tbody>
             </table>
         </div>
-        <a href="{{url('[[model_plural]]/add')}}" class="btn btn-primary" role="button">Add [[model_singular]]</a>
+        <a href="{{url('[[route_path]]/add')}}" class="btn btn-primary" role="button">Add [[model_singular]]</a>
     </div>
 </div>
 
@@ -46,23 +46,23 @@
                 "serverSide": true,
                 "ordering": false,
                 "responsive": true,
-                "ajax": "{{url('[[model_plural]]/grid')}}",
+                "ajax": "{{url('[[route_path]]/grid')}}",
                 "columnDefs": [
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/show')}}/'+row[0]+'">'+data +'</a>';
+                            return '<a href="{{url('[[route_path]]/show')}}/'+row[0]+'">'+data +'</a>';
                         },
                         "targets": 1
                     },
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/update')}}/'+row[0]+'" class="btn btn-default">Update</a>';
+                            return '<a href="{{url('[[route_path]]/update')}}/'+row[0]+'" class="btn btn-default">Update</a>';
                         },
                         "targets": [[num_columns]]
                     },
                     {
                         "render": function ( data, type, row ) {
-                            return '<a href="{{url('[[model_plural]]/delete')}}" onclick="return doDelete('+row[0]+')" class="btn btn-danger">Delete</a>';
+                            return '<a href="{{url('[[route_path]]/delete')}}" onclick="return doDelete('+row[0]+')" class="btn btn-danger">Delete</a>';
                         },
                         "targets": [[num_columns]]+1
                     },
@@ -71,7 +71,7 @@
         });
         function doDelete(id) {
             if(confirm('You really want to delete this record?')) {
-               $.ajax('{{url('[[model_plural]]/delete')}}/'+id).success(function() {
+               $.ajax('{{url('[[route_path]]/delete')}}/'+id).success(function() {
                 theGrid.ajax.reload();
                });
                 

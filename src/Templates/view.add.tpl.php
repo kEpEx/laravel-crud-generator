@@ -12,7 +12,7 @@
 
     <div class="panel-body">
                 
-        <form action="{{ url('/[[model_plural]]/save') }}" method="POST" class="form-horizontal">
+        <form action="{{ url('/[[route_path]]/save') }}" method="POST" class="form-horizontal">
             {{ csrf_field() }}
 
             [[foreach:columns]]
@@ -63,7 +63,7 @@
                     <button type="submit" class="btn btn-success">
                         <i class="fa fa-plus"></i> Save
                     </button> 
-                    <a class="btn btn-default" href="{{ url('/[[model_plural]]') }}"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
+                    <a class="btn btn-default" href="{{ url('/[[route_path]]') }}"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
                 </div>
             </div>
         </form>

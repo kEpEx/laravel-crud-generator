@@ -11,7 +11,7 @@ use App\[[model_uc]];
 
 use DB;
 
-class [[model_uc_plural]]Controller extends Controller
+class [[controller_name]]Controller extends Controller
 {
     //
     public function __construct()
@@ -22,12 +22,12 @@ class [[model_uc_plural]]Controller extends Controller
 
     public function getIndex(Request $request)
 	{
-	    return view('[[model_plural]].index', []);
+	    return view('[[view_folder]].index', []);
 	}
 
 	public function getAdd(Request $request)
 	{
-	    return view('[[model_plural]].add', [
+	    return view('[[view_folder]].add', [
 	        []
 	    ]);
 	}
@@ -35,7 +35,7 @@ class [[model_uc_plural]]Controller extends Controller
 	public function getUpdate(Request $request, $id)
 	{
 		$[[model_singular]] = [[model_uc]]::findOrFail($id);
-	    return view('[[model_plural]].add', [
+	    return view('[[view_folder]].add', [
 	        'model' => $[[model_singular]]
 	    ]);
 	}
@@ -43,7 +43,7 @@ class [[model_uc_plural]]Controller extends Controller
 	public function getShow(Request $request, $id)
 	{
 		$[[model_singular]] = [[model_uc]]::findOrFail($id);
-	    return view('[[model_plural]].show', [
+	    return view('[[view_folder]].show', [
 	        'model' => $[[model_singular]]
 	    ]);
 	}
@@ -108,7 +108,7 @@ class [[model_uc_plural]]Controller extends Controller
 	    //$[[model_singular]]->user_id = $request->user()->id;
 	    $[[model_singular]]->save();
 
-	    return redirect('/[[model_plural]]/index');
+	    return redirect('/[[route_path]]/index');
 
 	}
 
@@ -117,7 +117,7 @@ class [[model_uc_plural]]Controller extends Controller
 		$[[model_singular]] = [[model_uc]]::findOrFail($id);
 
 		$[[model_singular]]->delete();
-		return redirect('/[[model_plural]]/index');
+		return redirect('/[[route_path]]/index');
 	    
 	}
 

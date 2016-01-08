@@ -20,10 +20,12 @@ Add to config/app.php the following line to the 'providers' array:
 
 ###Usage
 
+Use the desired model name as the input 
+
 
 CRUD for students table
 
-	php artisan make:crud students
+	php artisan make:crud student
 
 or the whole database
 
@@ -32,6 +34,14 @@ or the whole database
 whole database with custom layout
 
 	php artisan make:crud all --master-layout=layouts.master 
+
+Because sometimes you need boilerplate code only for view and controller, you can use an existing model with custom controller name
+
+	php artisan make:crud student --master-layout=master --custom-controller=dashboard	
+
+For more options 
+
+	php artisan help make:crud
 
 ###Custom Templates
 

@@ -13,7 +13,7 @@
 
     <div class="panel-body">
                 
-        <form action="{{ url('/[[model_plural]]') }}" method="POST" class="form-horizontal">
+        <form action="{{ url('/[[route_path]]') }}" method="POST" class="form-horizontal">
         [[foreach:columns]]
         
         <div class="form-group">
@@ -27,7 +27,7 @@
 
         <div class="form-group">
             <div class="col-sm-offset-3 col-sm-6">
-                <a class="btn btn-default" href="{{ url('/[[model_plural]]') }}"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
+                <a class="btn btn-default" href="{{ url('/[[route_path]]') }}"><i class="glyphicon glyphicon-chevron-left"></i> Back</a>
             </div>
         </div>
 

@@ -33,7 +33,7 @@ class CrudGeneratorService
         $this->viewFolderName = strtolower($this->controllerName);
 
         $this->output->info('');
-        $this->output->info('Creating catalogue for table: '.$this->tableName);
+        $this->output->info('Creating catalogue for table: '.($this->tableName ?: strtolower(str_plural($this->modelName))));
         $this->output->info('Model Name: '.$modelname);
 
 
@@ -42,18 +42,23 @@ class CrudGeneratorService
             'model_uc_plural' => str_plural($modelname),
             'model_singular' => strtolower($modelname),
             'model_plural' => strtolower(str_plural($modelname)),
-            'tablename' => $this->tableName ?: str_plural($this->modelName),
+            'tablename' => $this->tableName ?: strtolower(str_plural($this->modelName)),
             'prefix' => $this->prefix,
             'custom_master' => $this->layout ?: 'crudgenerator::layouts.master',
+            'controller_name' => $this->controllerName,
+            'view_folder' => $this->viewFolderName,
+            'route_path' => $this->viewFolderName,
         ];
 
-        //if($recreate) { $this->deletePreviousFiles($tablename, $existing_model); }
-        /*if($existing_model) {
-            $columns = $this->getColumns($prefix.str_plural($existing_model));
-        }   
-        else {
-            $columns = $this->createModel($modelname, $prefix, $options['tablename']);
-        }*/
+        if(!$this->force) { 
+            if(file_exists(app_path().'/'.$modelname.'.php')) { $this->output->info('Model already exists, use --force to overwrite'); return; }
+            if(file_exists(app_path().'/Http/Controllers/'.$this->controllerName.'Controller.php')) { $this->output->info('Controller already exists, use --force to overwrite'); return; }
+            if(file_exists(base_path().'/resources/views/'.$this->viewFolderName.'/add.blade.php')) { $this->output->info('Add view already exists, use --force to overwrite'); return; }
+            if(file_exists(base_path().'/resources/views/'.$this->viewFolderName.'/show.blade.php')) { $this->output->info('Show view already exists, use --force to overwrite'); return; }
+            if(file_exists(base_path().'/resources/views/'.$this->viewFolderName.'/index.blade.php')) { $this->output->info('Index view already exists, use --force to overwrite');  return; }
+        }
+
+
         $columns = $this->createModel($modelname, $this->prefix, $this->tableName);
         
         $options['columns'] = $columns;
