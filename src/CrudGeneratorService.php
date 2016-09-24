@@ -19,6 +19,7 @@ class CrudGeneratorService
     public $controllerName = '';
     public $viewFolderName = '';
     public $output = null;
+    public $appNamespace = 'App';
 
  
     public function __construct()
@@ -48,6 +49,7 @@ class CrudGeneratorService
             'controller_name' => $this->controllerName,
             'view_folder' => $this->viewFolderName,
             'route_path' => $this->viewFolderName,
+            'appns' => $this->appNamespace,
         ];
 
         if(!$this->force) { 
