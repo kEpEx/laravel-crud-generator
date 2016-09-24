@@ -12,8 +12,13 @@
 
     <div class="panel-body">
                 
-        <form action="{{ url('/[[route_path]]/save') }}" method="POST" class="form-horizontal">
+        <form action="{{ url('/[[route_path]]'.( isset($model) ? "/" . $model->id : "")) }}" method="POST" class="form-horizontal">
             {{ csrf_field() }}
+
+            @if (isset($model))
+                <input type="hidden" name="_method" value="PATCH">
+            @endif
+
 
             [[foreach:columns]]
             [[if:i.type=='id']]

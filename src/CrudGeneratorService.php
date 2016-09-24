@@ -93,9 +93,16 @@ class CrudGeneratorService
         $filegenerator->Generate();
         //###############################################################################
 
-        $addroute = 'Route::controller(\'/'.$this->viewFolderName.'\', \''.$this->controllerName.'Controller\');';
-        $this->appendToEndOfFile(app_path().'/Http/routes.php', "\n".$addroute, 0, true);
+        $addroute = 'Route::get(\'/'.$this->viewFolderName.'/grid\', \''.$this->controllerName.'Controller@grid\');';
+        $this->appendToEndOfFile(base_path().'/routes/web.php', "\n".$addroute, 0, true);
         $this->output->info('Adding Route: '.$addroute );
+
+
+        $addroute = 'Route::resource(\'/'.$this->viewFolderName.'\', \''.$this->controllerName.'Controller\');';
+        $this->appendToEndOfFile(base_path().'/routes/web.php', "\n".$addroute, 0, true);
+        $this->output->info('Adding Route: '.$addroute );
+
+
     }
 
 
@@ -132,7 +139,7 @@ class CrudGeneratorService
         }
         
 
-        $columns = $this->getColumns($prefix.($table_name ?: str_plural($modelname)));
+        $columns = $this->getColumns($prefix.($table_name ?: strtolower(str_plural($modelname))));
 
         $cc = collect($columns);
 
@@ -170,23 +177,3 @@ class CrudGeneratorService
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
