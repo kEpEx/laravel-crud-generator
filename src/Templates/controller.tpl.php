@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace [[appns]]Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use [[appns]]Http\Requests;
+use [[appns]]Http\Controllers\Controller;
 
-use App\[[model_uc]];
+use [[appns]][[model_uc]];
 
 use DB;
 

@@ -2,6 +2,7 @@
 
 namespace CrudGenerator\Console\Commands;
 
+use Illuminate\Container\Container;
 use Illuminate\Console\Command;
 use DB;
 use Artisan;
@@ -94,7 +95,7 @@ class CrudGeneratorCommand extends Command
             $generator = new \CrudGenerator\CrudGeneratorService();
             $generator->output = $this;
 
-
+            $generator->appNamespace = Container::getInstance()->getNamespace();
             $generator->modelName = ucfirst($c['modelname']);
             $generator->tableName = $c['tablename'];
 
