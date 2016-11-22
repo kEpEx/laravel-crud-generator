@@ -109,13 +109,28 @@ class CrudGeneratorService
 
 
     protected function getColumns($tablename) {
-        $cols = DB::select("show columns from ".$tablename);
+        $dbType = DB::getDriverName();
+        switch ($dbType) {
+            case "pgsql":
+                $cols = DB::select("select column_name as Field, "
+                                . "data_type as Type, "
+                                . "is_nullable as Null "
+                                . "from INFORMATION_SCHEMA.COLUMNS "
+                                . "where table_name = '" . $tablename . "'");
+                break;
+            default:
+                $cols = DB::select("show columns from " . $tablename);
+                break;
+        }
+
         $ret = [];
         foreach ($cols as $c) {
+            $field = isset($c->Field) ? $c->Field : $c->field;
+            $type = isset($c->Type) ? $c->Type : $c->type;
             $cadd = [];
-            $cadd['name'] = $c->Field;
-            $cadd['type'] = $c->Field == 'id' ? 'id' : $this->getTypeFromDBType($c->Type);
-            $cadd['display'] = ucwords(str_replace('_', ' ', $c->Field));
+            $cadd['name'] = $field;
+            $cadd['type'] = $field == 'id' ? 'id' : $this->getTypeFromDBType($type);
+            $cadd['display'] = ucwords(str_replace('_', ' ', $field));
             $ret[] = $cadd;
         }
         return $ret;
