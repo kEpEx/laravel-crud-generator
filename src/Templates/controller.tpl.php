@@ -13,55 +13,57 @@ use DB;
 
 class [[controller_name]]Controller extends Controller
 {
-    //
-    public function __construct()
-    {
-        //$this->middleware('auth');
+  //
+  public function __construct()
+  {
+    //$this->middleware('auth');
+  }
+
+
+  public function index(Request $request)
+  {
+    return view('[[view_folder]].index', []);
+  }
+
+  public function create(Request $request)
+  {
+    return view('[[view_folder]].add', [
+      []
+    ]);
+  }
+
+  public function edit(Request $request, $id)
+  {
+    $[[model_singular]] = [[model_uc]]::findOrFail($id);
+    return view('[[view_folder]].add', [
+      'model' => $[[model_singular]]
+    ]);
+  }
+
+  public function show(Request $request, $id)
+  {
+    $[[model_singular]] = [[model_uc]]::findOrFail($id);
+    return view('[[view_folder]].show', [
+      'model' => $[[model_singular]]
+    ]);
+  }
+
+  public function grid(Request $request)
+  {
+    $len = $_GET['length'];
+    $start = $_GET['start'];
+
+    $select = "SELECT *,1,2 ";
+    $presql = " FROM [[prefix]][[tablename]] a ";
+    if($_GET['search']['value']) {
+      $presql .= " WHERE [[first_column_nonid]] LIKE '%".$_GET['search']['value']."%' ";
     }
 
+    $presql .= "  ";
 
-    public function index(Request $request)
-	{
-	    return view('[[view_folder]].index', []);
-	}
-
-	public function create(Request $request)
-	{
-	    return view('[[view_folder]].add', [
-	        []
-	    ]);
-	}
-
-	public function edit(Request $request, $id)
-	{
-		$[[model_singular]] = [[model_uc]]::findOrFail($id);
-	    return view('[[view_folder]].add', [
-	        'model' => $[[model_singular]]
-	    ]);
-	}
-
-	public function show(Request $request, $id)
-	{
-		$[[model_singular]] = [[model_uc]]::findOrFail($id);
-	    return view('[[view_folder]].show', [
-	        'model' => $[[model_singular]]
-	    ]);
-	}
-
-	public function grid(Request $request)
-	{
-		$len = $_GET['length'];
-		$start = $_GET['start'];
-
-		$select = "SELECT *,1,2 ";
-		$presql = " FROM [[prefix]][[tablename]] a ";
-		if($_GET['search']['value']) {
-			$presql .= " WHERE [[first_column_nonid]] LIKE '%".$_GET['search']['value']."%' ";
-		}
-
-		$presql .= "  ";
-
-    //Added Orderby Section
+    //------------------------------------
+    // 1/2/18 - Jasmine Robinson Added Orderby Section for the Grid Results
+    //------------------------------------
     $orderby = "";
     $columns = array([[foreach:columns]]'[[i.name]]',[[endforeach]]);
     $order = $columns[$request->input('order.0.column')];
@@ -69,75 +71,76 @@ class [[controller_name]]Controller extends Controller
     $orderby = "Order By " . $order . " " . $dir;
 
     $sql = $select.$presql.$orderby." LIMIT ".$start.",".$len;
+    //------------------------------------
 
-		$qcount = DB::select("SELECT COUNT(a.id) c".$presql);
-		//print_r($qcount);
-		$count = $qcount[0]->c;
+    $qcount = DB::select("SELECT COUNT(a.id) c".$presql);
+    //print_r($qcount);
+    $count = $qcount[0]->c;
 
-		$results = DB::select($sql);
-		$ret = [];
-		foreach ($results as $row) {
-			$r = [];
-			foreach ($row as $value) {
-				$r[] = $value;
-			}
-			$ret[] = $r;
-		}
+    $results = DB::select($sql);
+    $ret = [];
+    foreach ($results as $row) {
+      $r = [];
+      foreach ($row as $value) {
+        $r[] = $value;
+      }
+      $ret[] = $r;
+    }
 
-		$ret['data'] = $ret;
-		$ret['recordsTotal'] = $count;
-		$ret['iTotalDisplayRecords'] = $count;
+    $ret['data'] = $ret;
+    $ret['recordsTotal'] = $count;
+    $ret['iTotalDisplayRecords'] = $count;
 
-		$ret['recordsFiltered'] = count($ret);
-		$ret['draw'] = $_GET['draw'];
+    $ret['recordsFiltered'] = count($ret);
+    $ret['draw'] = $_GET['draw'];
 
-		echo json_encode($ret);
+    echo json_encode($ret);
 
-	}
-
-
-	public function update(Request $request) {
-	    //
-	    /*$this->validate($request, [
-	        'name' => 'required|max:255',
-	    ]);*/
-		$[[model_singular]] = null;
-		if($request->id > 0) { $[[model_singular]] = [[model_uc]]::findOrFail($request->id); }
-		else {
-			$[[model_singular]] = new [[model_uc]];
-		}
+  }
 
 
-	    [[foreach:columns]]
+  public function update(Request $request) {
+    //
+    /*$this->validate($request, [
+    'name' => 'required|max:255',
+  ]);*/
+  $[[model_singular]] = null;
+  if($request->id > 0) { $[[model_singular]] = [[model_uc]]::findOrFail($request->id); }
+  else {
+    $[[model_singular]] = new [[model_uc]];
+  }
 
-		[[if:i.name=='id']]
-	    $[[model_singular]]->[[i.name]] = $request->[[i.name]]?:0;
-		[[endif]]
-		[[if:i.name!='id']]
-	    $[[model_singular]]->[[i.name]] = $request->[[i.name]];
-		[[endif]]
 
-	    [[endforeach]]
-	    //$[[model_singular]]->user_id = $request->user()->id;
-	    $[[model_singular]]->save();
+  [[foreach:columns]]
 
-	    return redirect('/[[route_path]]');
+  [[if:i.name=='id']]
+  $[[model_singular]]->[[i.name]] = $request->[[i.name]]?:0;
+  [[endif]]
+  [[if:i.name!='id']]
+  $[[model_singular]]->[[i.name]] = $request->[[i.name]];
+  [[endif]]
 
-	}
+  [[endforeach]]
+  //$[[model_singular]]->user_id = $request->user()->id;
+  $[[model_singular]]->save();
 
-	public function store(Request $request)
-	{
-		return $this->update($request);
-	}
+  return redirect('/[[route_path]]');
 
-	public function destroy(Request $request, $id) {
+}
 
-		$[[model_singular]] = [[model_uc]]::findOrFail($id);
+public function store(Request $request)
+{
+  return $this->update($request);
+}
 
-		$[[model_singular]]->delete();
-		return "OK";
+public function destroy(Request $request, $id) {
 
-	}
+  $[[model_singular]] = [[model_uc]]::findOrFail($id);
+
+  $[[model_singular]]->delete();
+  return "OK";
+
+}
 
 
 }
