@@ -55,14 +55,20 @@ class [[controller_name]]Controller extends Controller
 
 		$select = "SELECT *,1,2 ";
 		$presql = " FROM [[prefix]][[tablename]] a ";
-		if($_GET['search']['value']) {	
+		if($_GET['search']['value']) {
 			$presql .= " WHERE [[first_column_nonid]] LIKE '%".$_GET['search']['value']."%' ";
 		}
-		
+
 		$presql .= "  ";
 
-		$sql = $select.$presql." LIMIT ".$start.",".$len;
+    //Added Orderby Section
+    $orderby = "";
+    $columns = array([[foreach:columns]]'[[i.name]]',[[endforeach]]);
+    $order = $columns[$request->input('order.0.column')];
+    $dir = $request->input('order.0.dir');
+    $orderby = "Order By " . $order . " " . $dir;
 
+    $sql = $select.$presql.$orderby." LIMIT ".$start.",".$len;
 
 		$qcount = DB::select("SELECT COUNT(a.id) c".$presql);
 		//print_r($qcount);
@@ -97,13 +103,13 @@ class [[controller_name]]Controller extends Controller
 	    ]);*/
 		$[[model_singular]] = null;
 		if($request->id > 0) { $[[model_singular]] = [[model_uc]]::findOrFail($request->id); }
-		else { 
+		else {
 			$[[model_singular]] = new [[model_uc]];
 		}
-	    
+
 
 	    [[foreach:columns]]
-		
+
 		[[if:i.name=='id']]
 	    $[[model_singular]]->[[i.name]] = $request->[[i.name]]?:0;
 		[[endif]]
@@ -125,13 +131,13 @@ class [[controller_name]]Controller extends Controller
 	}
 
 	public function destroy(Request $request, $id) {
-		
+
 		$[[model_singular]] = [[model_uc]]::findOrFail($id);
 
 		$[[model_singular]]->delete();
 		return "OK";
-	    
+
 	}
 
-	
+
 }
